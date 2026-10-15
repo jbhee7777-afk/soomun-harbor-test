@@ -10,12 +10,12 @@ function drawQPanel(G,q,y,h,order,label){const c=G.ctx;G.rr(8,y,AW-16,h,14,'rgba
 
 /* ---------- 안전 2: 대피 퀴즈 런 (서브웨이 서퍼) ---------- */
 arcDefine({id:'safety_run',ch:'safety',name:'대피 퀴즈 런',tag:'3줄 달리기 · 정답 문',from:'서브웨이 서퍼 (Subway Surfers)',icon:'🏃',
-  how:['왼쪽·오른쪽으로 밀면 줄을 바꾸고, 위로 밀면 점프, 아래로 밀면 숙이기!','위에 문제가 나오면 잘 읽고, 정답(가·나·다) 줄로 미리 옮겨 문을 통과해요!','🚧는 뛰어넘고, 🪧 표지판은 숙여 피하고, 🚌 버스는 옆 줄로 피해요. ⛑️를 모으면 점수!'],
+  how:['왼쪽·오른쪽으로 밀면 줄을 바꾸고, 위로 밀면 점프, 아래로 밀면 숙이기!','위에 문제가 나오면 장애물이 잠깐 멈춰요. 차분히 읽고 정답(가·나·다) 줄로 옮겨 문을 통과해요!','🚧는 뛰어넘고, 🪧 표지판은 숙여 피하고, 🚌 버스는 옆 줄로 피해요. ⛑️를 모으면 점수!'],
   init(G){
     const HY=150, goal=3+Math.round(G.d*6), vz=.3+.48*G.d, readT=7-3.6*G.d;
-    let P={lane:1,x:1,jy:0,vy:0,slide:0,inv:0},objs=[],t=1.2,hearts=3,passed=0,gate=null,ann=null,annT=2.5,scroll=0,coins=0;
+    let P={lane:1,x:1,jy:0,vy:0,slide:0,inv:0},objs=[],t=1.2,hearts=3,passed=0,gate=null,ann=null,annT=3.5,scroll=0,coins=0;
     const proj=(lane,z)=>{const s=1/(1+z*3.2);return {x:AW/2+(lane-1)*112*s,y:HY+(470-HY)*s,s}};
-    const newAnn=()=>{const q=drawQ(G.trial?0:CI);if(!q)return;const ord=G.shuffle(q.o.map((_,i)=>i)).slice(0,3);if(!ord.includes(q.a))ord[0]=q.a;const order=G.shuffle(ord);ann={q,order,t:readT}};
+    const newAnn=()=>{const q=drawQ(G.trial?0:CI);if(!q)return;const ord=G.shuffle(q.o.map((_,i)=>i)).slice(0,3);if(!ord.includes(q.a))ord[0]=q.a;const order=G.shuffle(ord);ann={q,order,t:readT};objs=objs.filter(o=>o.z<.45);G.pop('📖 장애물 멈춤! 문제를 읽어요',AW/2,300,'#FFE27A',17)};
     const lane=d=>{P.lane=G.clamp(P.lane+d,0,2);G.sfx('whoosh')};
     const hit=why=>{if(P.inv)return;hearts--;P.inv=1.2;G.sfx('hurt');G.shake=7;if(why)G.pop(why,AW/2,300,'#FF8A8A',16);if(hearts<=0)G.lose('너무 많이 부딪혔어요! 문제를 잘 읽고 미리 줄을 옮겨요.')};
     return {
@@ -24,15 +24,14 @@ arcDefine({id:'safety_run',ch:'safety',name:'대피 퀴즈 런',tag:'3줄 달리
         if(P.jy>0||P.vy){P.vy-=1500*dt;P.jy+=P.vy*dt;if(P.jy<=0){P.jy=0;P.vy=0}}
         if(!ann&&!gate){annT-=dt;if(annT<=0)newAnn()}
         if(ann){ann.t-=dt;if(ann.t<=0){gate={...ann,z:1};ann=null}}
-        t-=dt;if(t<=0){t=G.rand(.8,1.4)*(1.15-.65*G.d);const near=gate&&gate.z<1&&gate.z>.4;
-          if(!near){const L=G.ri(0,2),k=Math.random();objs.push({lane:L,z:1,k:k<.4?'low':k<.7?'high':'block'});if(Math.random()<.6)objs.push({lane:(L+G.ri(1,2))%3,z:1.08,k:'coin'})}}
+        t-=dt;if(t<=0){t=G.rand(.8,1.4)*(1.15-.65*G.d);if(!ann&&!gate){const L=G.ri(0,2),k=Math.random();objs.push({lane:L,z:1,k:k<.4?'low':k<.7?'high':'block'});if(Math.random()<.6)objs.push({lane:(L+G.ri(1,2))%3,z:1.08,k:'coin'})}}
         for(const o of objs){o.z-=vz*dt;if(o.z<.05&&o.z>-.05&&!o.done&&o.lane===P.lane){o.done=1;
           if(o.k==='coin'){coins++;G.sfx('coin');G.addScore(5)}else if(o.k==='low'&&P.jy<35)hit('🚧 점프!');else if(o.k==='high'&&P.slide<=0)hit('🪧 숙여요!');else if(o.k==='block')hit('🚌 옆 줄로!')}}
         objs=objs.filter(o=>o.z>-.1&&!(o.done&&o.k==='coin'));
         if(gate){gate.z-=vz*dt;if(gate.z<.03){const ok=gate.order[P.lane]===gate.q.a;
             if(ok){passed++;G.sfx('ok');G.burst(AW/2,380,'#7FFFA0',24);G.addScore(30);G.pop('정답 문 통과!',AW/2,330,'#7FFFA0',22);if(passed>=goal){gate=null;return G.win(starsByHearts(hearts))}}
             else{if(!G.trial)wrongAdd(CI,gate.q);hit(`정답은 ${'가나다'[gate.order.indexOf(gate.q.a)]}!`)}
-            gate=null;annT=1.4}}
+            gate=null;annT=3.5+2.5*G.d}}
         G.setHud(HEARTS(hearts),`🚪 ${passed}/${goal}`,`⛑️ ${coins}`)},
       draw(c){c.fillStyle=G.grad(0,HY,'#5A3A8A','#FF9A6A');c.fillRect(0,0,AW,HY);c.fillStyle='#4E8A3A';c.fillRect(0,HY,AW,AH-HY);
         const a=proj(-.5,1),b=proj(2.5,1),c2=proj(2.5,0),d=proj(-.5,0);c.fillStyle='#4A4A58';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(c2.x+30,AH);c.lineTo(d.x-30,AH);c.fill();
@@ -41,7 +40,7 @@ arcDefine({id:'safety_run',ch:'safety',name:'대피 퀴즈 런',tag:'3줄 달리
         for(const o of all){if(o.z>1.05||o.z<-.1)continue;
           if(o.g){for(let L=0;L<3;L++){const p=proj(L,o.z);G.rr(p.x-48*p.s,p.y-120*p.s,96*p.s,120*p.s,12*p.s,null,'#FFE27A',5*p.s);G.text('가나다'[L],p.x,p.y-132*p.s,Math.max(10,30*p.s),'#FFE27A')}continue}
           const p=proj(o.lane,o.z);G.emo({low:'🚧',high:'🪧',block:'🚌',coin:'⛑️'}[o.k],p.x,p.y-(o.k==='high'?70:o.k==='block'?34:20)*p.s,(o.k==='block'?84:52)*p.s)}
-        const pp=proj(P.x,0);if(!(P.inv&&Math.floor(G.t*12)%2)){c.save();c.translate(pp.x,pp.y-P.jy-6);if(P.slide>0)c.scale(1.2,.55);G.emo('🏃',0,-24,52);c.restore()}
+        const pp=proj(P.x,0);if(!(P.inv&&Math.floor(G.t*12)%2)){c.save();c.translate(pp.x,pp.y-P.jy-6);const rk=P.jy>0?'run_bj':P.slide>0?'run_bc':(Math.floor(G.t*8)%2?'run_b1':'run_b2');if(P.slide>0&&!arcSprite(rk))c.scale(1.2,.55);G.spr(rk,'🏃',0,-24,56);c.restore()}
         const q=ann||gate;if(q){drawQPanel(G,q.q,6,100,q.order);if(ann){G.rr(16,98,(AW-32)*(ann.t/readT),5,3,'#FFE27A')}}},
       swipe(d){if(d==='L')lane(-1);else if(d==='R')lane(1);else if(d==='U'&&!P.jy){P.vy=620;P.jy=1;G.sfx('jump')}else if(d==='D'){P.slide=.8;P.vy=P.jy?-900:0;G.sfx('whoosh')}},
       tap(x){lane(x<AW/2?-1:1)},key(k){if(k==='A')k='U';this.swipe(k)}
@@ -80,7 +79,8 @@ arcDefine({id:'character_crowd',ch:'character',name:'친구 모으기 런',tag:'
             G.text(`${s.op}${s.v}`,x+(AW-60)/4,e.y-12,24,'#FFF');G.text(s.txt,x+(AW-60)/4,e.y+14,13,'#FFF')})}
           else G.emo('🪵',e.x,e.y,70)}
         if(boss){G.emo('😢',AW/2,150,120);G.text(`외로운 거인 ${bossHP}`,AW/2,230,18);G.text(n>=bossHP?'친구가 되어 줬어요!':'친구가 모자라요…',AW/2,260,16,n>=bossHP?'#7FFFA0':'#FF8A8A')}
-        const R=rad(),show=Math.min(n,70);for(let i=0;i<show;i++){const a=i*2.399,r=Math.sqrt(i/show)*R,x=cx+Math.cos(a)*r,y=430+Math.sin(a)*r*.6;G.circle(x,y+4,5,'#3C6FD1');G.circle(x,y-3,4.5,'#FFD9B8','#8A552B',1)}
+        const R=rad(),show=Math.min(n,70),kid=arcSprite('run_g'),pts=[];for(let i=0;i<show;i++){const a=i*2.399,r=Math.sqrt(i/show)*R;pts.push({i,x:cx+Math.cos(a)*r,y:430+Math.sin(a)*r*.6})}pts.sort((p,q)=>p.y-q.y);
+        for(const p of pts){if(kid){const bob=Math.abs(Math.sin(G.t*10+p.i))*2.5;G.emo(['run_g','run_k','run_b1','run_b2'][p.i%4],p.x,p.y-4-bob,show>40?15:19)}else{G.circle(p.x,p.y+4,5,'#3C6FD1');G.circle(p.x,p.y-3,4.5,'#FFD9B8','#8A552B',1)}}
         G.rr(cx-22,430-R*.6-30,44,22,10,'#2A1A0E');G.text(String(n),cx,430-R*.6-19,15,'#FFE27A','center',null)},
       down(x){tx=G.clamp(x,30,AW-30)},move(x){tx=G.clamp(x,30,AW-30)},
       key(k){if(k==='L')keyD=-1;if(k==='R')keyD=1},keyup(k){if(k==='L'||k==='R')keyD=0}

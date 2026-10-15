@@ -308,6 +308,7 @@ function arcMakeG(cv,lv,d,ch){
     setHud(a,b,c){const s=[a,b,c];s.forEach((v,i)=>{const e=document.getElementById('arcH'+i);if(!e)return;e.hidden=v==null;if(v!=null&&e._v!==v){e._v=v;e.textContent=v}})},
     burst(x,y,col='#FFE27A',n=12,sp=140){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=sp*(.4+Math.random()*.8);G.fx.push({k:'p',x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,life:.7,max:.7,col,r:2+Math.random()*3})}},
     pop(txt,x,y,col='#FFE27A',s=20){G.fx.push({k:'t',x,y,vy:-50,life:.9,max:.9,txt,col,s})},
+    spr(k,fb,x,y,s=32,a=1,rot=0){G.emo(arcSprite(k)?k:fb,x,y,s,a,rot)},
     shake:0,
     fxUpdate(dt){for(const f of G.fx){f.life-=dt;f.x+=(f.vx||0)*dt;f.y+=(f.vy||0)*dt;if(f.k==='p')f.vy+=260*dt}G.fx=G.fx.filter(f=>f.life>0);if(G.shake>0)G.shake=Math.max(0,G.shake-dt*30)},
     fxDraw(){for(const f of G.fx){const a=Math.max(0,f.life/f.max);if(f.k==='p'){ctx.globalAlpha=a;G.circle(f.x,f.y,f.r,f.col)}else{ctx.globalAlpha=a;G.text(f.txt,f.x,f.y,f.s,f.col)}}ctx.globalAlpha=1},

@@ -12,7 +12,7 @@ arcDefine({id:'safety_cross',ch:'safety',name:'안전 건널목',tag:'신호 지
         cars:[...Array(n)].map((_,i)=>({x:i*(C*S/n)+G.rand(0,30),e:bus?'🚌':G.pick(cars),w:bus?70:36,rude:G.d>.35&&Math.random()<.06+.2*G.d}))}});
     const P={c:G.ri(0,C-1),r:12,x:0,y:12,inv:0};P.x=P.c;
     let hearts=3,time=Math.round(70-25*G.d),T0=time,jay=0,safe=0;
-    const move=(dc,dr)=>{if(G.over)return;const c=P.c+dc,r=P.r+dr;if(c<0||c>=C||r<0||r>12)return;
+    const move=(dc,dr)=>{if(G.over)return;P.face=dr<0?'U':dr>0?'D':dc<0?'L':'R';const c=P.c+dc,r=P.r+dr;if(c<0||c>=C||r<0||r>12)return;
       const L=lanes[r];if(L&&dr!==0){if(c!==L.cw){jay++;G.pop('무단횡단!',c*S+S/2,OY+r*S,'#FF8A8A',16);G.sfx('no')}else if(L.walk){safe++;G.addScore(10,c*S+S/2,OY+r*S)}}
       P.c=c;P.r=r;G.sfx('jump');
       if(r===0){G.burst(P.c*S+S/2,OY+S/2,'#7FD69A',30);G.win(hearts===3&&jay===0&&time>T0*.3?3:hearts>=2&&jay<=1?2:1)}};
@@ -39,7 +39,8 @@ arcDefine({id:'safety_cross',ch:'safety',name:'안전 건널목',tag:'신호 지
           else if(r>0&&r<12)G.rr(0,y,AW,3,0,'#8A7A6A')}
         G.emo('🏫',AW/2,OY+S/2,30);
         for(const r in lanes){const L=lanes[r];for(const k of L.cars){const x=k.x+k.w/2,y=OY+r*S+S/2,s=k.w>40?40:32;if(L.dir>0)emoFlip(G,k.e,x,y,s);else G.emo(k.e,x,y,s);if(k.rude)G.emo('🚨',x,y-16,14)}}
-        if(!(P.inv&&Math.floor(G.t*10)%2))G.emo('🧒',P.x*S+S/2,OY+P.y*S+S/2-Math.abs(Math.sin((P.y-P.r)*Math.PI))*8,32)},
+        if(!(P.inv&&Math.floor(G.t*10)%2)){const px=P.x*S+S/2,py=OY+P.y*S+S/2-Math.abs(Math.sin((P.y-P.r)*Math.PI))*8,f=P.face||'U';
+          if(f==='U')G.spr('walk_bag','🧒',px,py,34);else if(f==='L'&&arcSprite('run_side'))emoFlip(G,'run_side',px,py,34);else if(f==='R')G.spr('run_side','🧒',px,py,34);else G.emo('🧒',px,py,32)}},
       tap(x,y){const px=P.c*S+S/2,py=OY+P.r*S+S/2,dx=x-px,dy=y-py;if(Math.abs(dx)>Math.abs(dy))move(dx>0?1:-1,0);else move(0,dy>0?1:-1)},
       swipe(d){move(d==='L'?-1:d==='R'?1:0,d==='U'?-1:d==='D'?1:0)},
       key(k){if(k!=='A')this.swipe(k)}

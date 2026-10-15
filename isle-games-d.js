@@ -189,14 +189,14 @@ arcDefine({id:'dokdo_snakeio',ch:'dokdo',name:'괭이갈매기.io',tag:'.io 꼬�
     const step=(s,dt,sp)=>{let da=((s.ta-s.a+Math.PI*3)%(Math.PI*2))-Math.PI;s.a+=G.clamp(da,-3.2*dt,3.2*dt);s.x+=Math.cos(s.a)*sp*dt;s.y+=Math.sin(s.a)*sp*dt;
       if(s.x<20||s.x>WW-20||s.y<20||s.y>WH-20){s.ta=Math.atan2(WH/2-s.y,WW/2-s.x);s.x=G.clamp(s.x,20,WW-20);s.y=G.clamp(s.y,20,WH-20)}s.trail.unshift({x:s.x,y:s.y});if(s.trail.length>s.len*12)s.trail.length=s.len*12};
     const newQuiz=()=>{const q=drawQ(G.trial?7:CI);if(!q)return;const ord=G.shuffle(q.o.map((_,i)=>i)).slice(0,3);if(!ord.includes(q.a))ord[0]=q.a;const o=G.shuffle(ord);
-      quiz={q,order:o,orbs:o.map((oi,j)=>({x:G.clamp(me.x+Math.cos(j*2.1+me.a)*170,40,WW-40),y:G.clamp(me.y+Math.sin(j*2.1+me.a)*170,40,WH-40),j,oi})),t:22-6*G.d}};
+      quiz={q,order:o,orbs:o.map((oi,j)=>({x:G.clamp(me.x+Math.cos(j*2.1+me.a)*170,40,WW-40),y:G.clamp(me.y+Math.sin(j*2.1+me.a)*170,40,WH-40),j,oi})),t:22-6*G.d};inv=Math.max(inv,3);G.pop('📖 3초 동안 안 부딪혀요! 문제를 읽어요',AW/2,250,'#FFE27A',16)};
     const hurt=()=>{if(inv)return;hearts--;inv=2;G.sfx('hurt');G.shake=7;const s=seg(me);s.forEach((p,i)=>{if(i%2)addFood(p.x,p.y,1)});me.len=Math.max(6,Math.floor(me.len*.6));if(hearts<=0)G.lose('다른 갈매기에 너무 많이 부딪혔어요!')};
     return {
       boostText:'무리 +5', boost(){me.len+=5},
       update(dt){time-=dt;if(time<=0)return G.lose(`시간이 다 됐어요! (${me.len}/${goal})`);inv=Math.max(0,inv-dt);
         if(aim)me.ta=Math.atan2(aim.y-AH/2,aim.x-AW/2);step(me,dt,125+20*G.d);
         for(const a of ais){if(a.dead){a.dead-=dt;if(a.dead<=0){Object.assign(a,mk(G.rand(100,WW-100),G.rand(100,WH-100),G.ri(8,14),true));a.dead=0}continue}
-          const f=food.reduce((b,x)=>{const d=Math.hypot(x.x-a.x,x.y-a.y);return d<b.d?{d,x}:b},{d:1e9,x:null});if(Math.random()<.02+.05*G.d&&Math.hypot(me.x-a.x,me.y-a.y)<300)a.ta=Math.atan2(me.y+Math.sin(me.a)*60-a.y,me.x+Math.cos(me.a)*60-a.x);else if(f.x&&Math.random()<.05)a.ta=Math.atan2(f.x.y-a.y,f.x.x-a.x);step(a,dt,110+60*G.d)}
+          const f=food.reduce((b,x)=>{const d=Math.hypot(x.x-a.x,x.y-a.y);return d<b.d?{d,x}:b},{d:1e9,x:null});if(!quiz&&Math.random()<.02+.05*G.d&&Math.hypot(me.x-a.x,me.y-a.y)<300)a.ta=Math.atan2(me.y+Math.sin(me.a)*60-a.y,me.x+Math.cos(me.a)*60-a.x);else if(f.x&&Math.random()<.05)a.ta=Math.atan2(f.x.y-a.y,f.x.x-a.x);step(a,dt,(110+60*G.d)*(quiz?.6:1))}
         const all=[me,...ais.filter(a=>!a.dead)];
         for(const s of all){for(let i=food.length-1;i>=0;i--){const f=food[i];if(Math.hypot(f.x-s.x,f.y-s.y)<16){s.len+=f.v;food.splice(i,1);if(s===me){G.sfx('coin');G.addScore(f.v*2)}}}}
         while(food.length<90)addFood();
@@ -214,7 +214,7 @@ arcDefine({id:'dokdo_snakeio',ch:'dokdo',name:'괭이갈매기.io',tag:'.io 꼬�
         for(const f of food)if(Math.abs(f.x-me.x)<AW&&Math.abs(f.y-me.y)<AH)G.emo('🐟',f.x,f.y,f.v>1?24:16);
         if(quiz)for(const o of quiz.orbs){G.circle(o.x,o.y,22,'#FFE27A','#8A5410',3);G.text('가나다'[o.j],o.x,o.y+1,20,'#4A240E','center',null)}
         for(const s of [...ais.filter(a=>!a.dead),me]){const sg=seg(s);for(let i=sg.length-1;i>0;i--)G.circle(sg[i].x,sg[i].y,9,s.col,'rgba(0,0,0,.3)',1.5);
-          if(s===me&&inv&&Math.floor(G.t*12)%2)continue;if(Math.cos(s.a)>0)emoFlip(G,'🐦',s.x,s.y,30);else G.emo('🐦',s.x,s.y,30)}
+          if(s===me&&inv&&Math.floor(G.t*12)%2)continue;if(arcSprite('gull_top'))G.emo('gull_top',s.x,s.y,36,1,s.a+Math.PI/2);else if(Math.cos(s.a)>0)emoFlip(G,'🐦',s.x,s.y,30);else G.emo('🐦',s.x,s.y,30)}
         c.restore();if(quiz)drawQPanel(G,quiz.q,6,100,quiz.order)},
       down(x,y){aim={x,y}},move(x,y,dn){if(dn)aim={x,y}},
       key(k){const m={L:Math.PI,R:0,U:-Math.PI/2,D:Math.PI/2}[k];if(m!=null){me.ta=m;aim=null}}
