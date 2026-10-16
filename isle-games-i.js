@@ -179,7 +179,7 @@ arcDefine({id:'dokdo_fish',ch:'dokdo',name:'독도 바다 낚시',tag:'타이밍
           if(cast.t>=1.7)cast=null}
         for(const c of catchA)c.t+=dt*1.6;catchA=catchA.filter(c=>c.t<1);
         G.setHud(TIME(time),want.map(w=>`${w.f[0]}${w.got}/${w.need}`).join(' '),clean?`🧹 ${clean}`:`${G.lv}단계`)},
-      draw(c){const im=v2img('dokdo_sea.jpg');if(im)drawCover(c,im,0,0,AW,AH);else{c.fillStyle=G.grad(0,AH,'#9FD8FF','#0B3A60');c.fillRect(0,0,AW,AH)}
+      draw(c){const im=v2img('dokdo_sea.jpg');if(im)drawCover(c,im,0,0,AW,AH);else{c.fillStyle=G.grad(0,AH,'#9FD8FF','#0B3A60');c.fillRect(0,0,AW,AH)}if(typeof drawTaegeukgi==='function'){c.fillStyle='#E8E8EE';c.fillRect(280,102,2,30);drawTaegeukgi(c,282,101,26,Math.sin(G.t*3)*.5)}
         for(const s of shoals){for(let i=0;i<s.n;i++){const a=i*2.4+s.ph*1.5,r=8+(i%3)*9,x=s.x+Math.cos(a)*r*1.4,y=s.y+Math.sin(a)*r*.6;c.fillStyle='rgba(10,40,70,.45)';c.beginPath();c.ellipse(x,y+3,12,5,0,0,6.29);c.fill();G.emo(s.f[0],x,y,s.trash?26:22,.9)}
           c.strokeStyle=`rgba(255,255,255,${.25+.15*Math.sin(s.ph*4)})`;c.lineWidth=2;c.beginPath();c.ellipse(s.x,s.y,30+s.n*3,12+s.n,0,0,6.29);c.stroke();if(s.n>=5)G.text('✨',s.x+28,s.y-14,14,'#FFF','center',null)}
         if(!cast){c.save();c.translate(ax,ay);c.rotate(G.t);c.strokeStyle='#FFE27A';c.lineWidth=3;c.setLineDash([8,6]);c.beginPath();c.arc(0,0,22,0,6.29);c.stroke();c.restore();c.setLineDash([]);G.circle(ax,ay,4,'#FFE27A');}
@@ -196,51 +196,7 @@ arcDefine({id:'dokdo_fish',ch:'dokdo',name:'독도 바다 낚시',tag:'타이밍
       down(){if(cast||cool)return;cast={x:ax,y:ay,t:0};cool=.3;G.sfx('whoosh')}
     }}});
 
-/* ---------- 독도 3: 괭이갈매기.io — 문제는 황금 조개를 먹으면 (게임이 멈추고 크게) ---------- */
-arcDefine({id:'dokdo_snakeio',ch:'dokdo',name:'괭이갈매기.io',tag:'.io 무리 키우기',from:'스네이크.io · 슬리더리오',icon:'🐦',
-  how:['누른 쪽으로 갈매기 무리가 날아요','🐟를 먹으면 무리가 길어져요','🐚 황금 조개를 먹으면 퀴즈! (게임 멈춤)'],
-  init(G){
-    const WW=1300,WH=1300,goal=30+Math.round(G.d*55),nAI=2+Math.round(G.d*4);
-    const mk=(x,y,len,ai)=>({x,y,a:Math.random()*6.28,ta:0,trail:[],len,ai,dead:0,col:ai?`hsl(${G.ri(0,360)},55%,72%)`:'#FFFFFF'});
-    let me=mk(WW/2,WH/2,8,false),ais=[...Array(nAI)].map(()=>mk(G.rand(200,WW-200),G.rand(200,WH-200),G.ri(8,16),true)),food=[],shells=[],hearts=3,inv=1.5,aim=null,time=Math.round(130-20*G.d),waves=0;
-    const addFood=(x,y,v=1)=>food.push({x:x??G.rand(30,WW-30),y:y??G.rand(30,WH-30),v});for(let i=0;i<90;i++)addFood();
-    const addShell=()=>shells.push({x:G.rand(80,WW-80),y:G.rand(80,WH-80)});for(let i=0;i<3;i++)addShell();
-    const seg=s=>{const out=[];const sp=10;let d=0,last={x:s.x,y:s.y};out.push(last);for(const p of s.trail){d+=Math.hypot(p.x-last.x,p.y-last.y);last=p;if(d>=sp*out.length)out.push(p);if(out.length>=s.len)break}return out};
-    const step=(s,dt,sp)=>{let da=((s.ta-s.a+Math.PI*3)%(Math.PI*2))-Math.PI;s.a+=G.clamp(da,-3.2*dt,3.2*dt);s.x+=Math.cos(s.a)*sp*dt;s.y+=Math.sin(s.a)*sp*dt;
-      if(s.x<20||s.x>WW-20||s.y<20||s.y>WH-20){s.ta=Math.atan2(WH/2-s.y,WW/2-s.x);s.x=G.clamp(s.x,20,WW-20);s.y=G.clamp(s.y,20,WH-20)}s.trail.unshift({x:s.x,y:s.y});if(s.trail.length>s.len*12)s.trail.length=s.len*12};
-    const quiz=()=>{const q=drawQ(G.trial?7:CI);if(!q||typeof runQuiz!=='function')return;aim=null;
-      runQuiz(q,{tag:'🐚 황금 조개 퀴즈',title:'맞히면 무리 +6!',closable:false,rightLabel:'좋아요! 계속 날기',wrongLabel:'계속 날기',
-        onRight:()=>{if(G.over)return;me.len+=6;G.sfx('star');G.pop('정답! 무리 +6',AW/2,200,'#7FFFA0',24);G.addScore(30);inv=Math.max(inv,1.5)},
-        onWrong:()=>{if(G.over)return;if(!G.trial)wrongAdd(CI,q);inv=Math.max(inv,1.5)}})};
-    const hurt=()=>{if(inv)return;hearts--;inv=2;G.sfx('hurt');G.shake=7;const s=seg(me);s.forEach((p,i)=>{if(i%2)addFood(p.x,p.y,1)});me.len=Math.max(6,Math.floor(me.len*.6));if(hearts<=0)G.lose('다른 갈매기에 너무 많이 부딪혔어요!')};
-    return {
-      boostText:'무리 +5', boost(){me.len+=5},
-      update(dt){time-=dt;inv=Math.max(0,inv-dt);waves+=dt;if(time<=0)return G.lose(`시간이 다 됐어요! (${me.len}/${goal})`);
-        if(aim)me.ta=Math.atan2(aim.y-AH/2,aim.x-AW/2);step(me,dt,125+20*G.d);
-        for(const a of ais){if(a.dead){a.dead-=dt;if(a.dead<=0){Object.assign(a,mk(G.rand(100,WW-100),G.rand(100,WH-100),G.ri(8,14),true));a.dead=0}continue}
-          const f=food.reduce((b,x)=>{const d=Math.hypot(x.x-a.x,x.y-a.y);return d<b.d?{d,x}:b},{d:1e9,x:null});if(Math.random()<.015+.04*G.d&&Math.hypot(me.x-a.x,me.y-a.y)<300)a.ta=Math.atan2(me.y+Math.sin(me.a)*60-a.y,me.x+Math.cos(me.a)*60-a.x);else if(f.x&&Math.random()<.05)a.ta=Math.atan2(f.x.y-a.y,f.x.x-a.x);step(a,dt,105+55*G.d)}
-        for(const s of [me,...ais.filter(a=>!a.dead)]){for(let i=food.length-1;i>=0;i--){const f=food[i];if(Math.hypot(f.x-s.x,f.y-s.y)<16){s.len+=f.v;food.splice(i,1);if(s===me){G.sfx('coin');G.addScore(f.v*2)}}}}
-        while(food.length<90)addFood();
-        for(let i=shells.length-1;i>=0;i--){if(Math.hypot(shells[i].x-me.x,shells[i].y-me.y)<24){shells.splice(i,1);G.sfx('unlock');setTimeout(addShell,6000);quiz();break}}
-        for(const a of ais){if(a.dead)continue;const sa=seg(a);if(!inv&&sa.slice(3).some(p=>Math.hypot(p.x-me.x,p.y-me.y)<12))hurt();
-          const sm=seg(me);if(sm.slice(3).some(p=>Math.hypot(p.x-a.x,p.y-a.y)<12)){sa.forEach(p=>addFood(p.x+G.rand(-6,6),p.y+G.rand(-6,6),1));a.dead=3;G.sfx('pop');G.pop('갈매기 퇴장!',AW/2,200,'#FFE27A',20)}}
-        if(me.len>=goal)return G.win(starsByHearts(hearts));
-        G.setHud(HEARTS(hearts),`🐦 ${me.len}/${goal}`,TIME(time))},
-      draw(c){const cx=me.x-AW/2,cy=me.y-AH/2;c.fillStyle=G.grad(0,AH,'#3AA0D8','#0B3A60');c.fillRect(0,0,AW,AH);c.save();c.translate(-cx,-cy);
-        c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=2;for(let y=40;y<WH;y+=70){c.beginPath();for(let x=0;x<=WW;x+=30){const yy=y+Math.sin(x*.03+waves*1.5+y)*5;x?c.lineTo(x,yy):c.moveTo(x,yy)}c.stroke()}
-        G.rr(0,0,WW,WH,0,null,'#FFE27A',6);
-        {const isl=(x,y,w,h,flag)=>{c.fillStyle='rgba(255,255,255,.5)';c.beginPath();c.ellipse(x,y+4,w*.62,12,0,0,6.29);c.fill();const g=c.createLinearGradient(x-w/2,0,x+w/2,0);g.addColorStop(0,'#5A4A3A');g.addColorStop(.5,'#9A8468');g.addColorStop(1,'#4A3A2C');c.fillStyle=g;c.beginPath();c.moveTo(x-w/2,y);c.lineTo(x-w*.32,y-h*.45);c.lineTo(x-w*.12,y-h*.7);c.lineTo(x,y-h);c.lineTo(x+w*.14,y-h*.72);c.lineTo(x+w*.34,y-h*.4);c.lineTo(x+w/2,y);c.closePath();c.fill();c.fillStyle='#5E9E48';c.beginPath();c.moveTo(x-w*.2,y-h*.6);c.lineTo(x,y-h*.95);c.lineTo(x+w*.12,y-h*.66);c.lineTo(x-w*.04,y-h*.58);c.closePath();c.fill();if(flag){G.rr(x-1,y-h-26,2,26,1,'#EEE');G.rr(x+1,y-h-26,18,12,1,'#FFF');G.circle(x+10,y-h-20,3.5,'#E0303A')}};isl(WW/2-80,WH/2-110,110,130,false);isl(WW/2+50,WH/2-110,130,110,true);G.text('독도',WW/2-15,WH/2-82,22,'#FFFFFF','center','#0B3A60')}
-        for(const f of food)if(Math.abs(f.x-me.x)<AW&&Math.abs(f.y-me.y)<AH)G.emo('🐟',f.x,f.y,f.v>1?24:17);
-        for(const s of shells){c.save();c.shadowColor='#FFE27A';c.shadowBlur=14+6*Math.sin(G.t*5);G.circle(s.x,s.y,20,'rgba(255,226,122,.35)');c.restore();G.emo('🐚',s.x,s.y,28)}
-        for(const s of [...ais.filter(a=>!a.dead),me]){const sg=seg(s);for(let i=sg.length-1;i>0;i--)G.circle(sg[i].x,sg[i].y,9,s.col,'rgba(0,0,0,.3)',1.5);
-          if(s===me&&inv&&Math.floor(G.t*12)%2)continue;if(arcSprite('gull_top'))G.emo('gull_top',s.x,s.y,36,1,s.a+Math.PI/2);else if(Math.cos(s.a)>0)emoFlip(G,'🐦',s.x,s.y,30);else G.emo('🐦',s.x,s.y,30)}
-        c.restore();
-        const sh=shells.reduce((b,s)=>{const d=Math.hypot(s.x-me.x,s.y-me.y);return d<b.d?{d,s}:b},{d:1e9,s:null});
-        if(sh.s&&sh.d>200){const a=Math.atan2(sh.s.y-me.y,sh.s.x-me.x);G.text('🐚',AW/2+Math.cos(a)*150,AH/2+Math.sin(a)*150,22,'#FFF','center',null)}},
-      down(x,y){aim={x,y}},move(x,y,dn){if(dn)aim={x,y}},
-      key(k){const m={L:Math.PI,R:0,U:-Math.PI/2,D:Math.PI/2}[k];if(m!=null){me.ta=m;aim=null}}
-    }}});
-
+/* 독도 3: 괭이갈매기.io 는 isle-games-k.js 에서 새로 만들었어요 */
 /* ---------- 섬마다 놀이 3가지: 경제 섬은 마트 타이쿤 대신 저금 코인 푸셔 ---------- */
 if(typeof ISLE_SET!=='undefined')ISLE_SET.money=['money_pusher','money_apple','money_pin'];
 

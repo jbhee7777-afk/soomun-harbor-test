@@ -55,6 +55,8 @@ arcDefine({id:'multi_slice',ch:'multi',name:'세계 요리 주문 썰기',tag:'�
       up(){trail=[]}
     }}});
 
+/* 틀린 그림 장면 12가지 (Canva) — 한 바퀴 다 볼 때까지 같은 그림이 다시 안 나와요 */
+const DIFF_SCENES=['diff_town.jpg','diff_park.jpg','diff_school.jpg','diff_market.jpg','diff_library.jpg','diff_beach.jpg','diff_hospital.jpg','diff_farm.jpg','diff_station.jpg','diff_cafeteria.jpg','diff_winter.jpg','diff_aquarium.jpg'];
 /* ---------- 인권 3: 모두의 마을 틀린 그림 — Canva 그림 위에서 진짜 다른 곳 찾기 ----------
    위 그림은 원래 그림, 아래 그림은 몇 군데를 바꿔요: 색 바꾸기 · 좌우 뒤집기 · 크게 · 물건 더하기/빼기 (부드러운 가장자리) */
 const DIFF_FACT=['📚 모든 어린이는 배울 권리가 있어요','🏥 아플 때 치료받을 권리가 있어요','🍚 굶지 않고 먹을 권리가 있어요','🏠 안전한 집에서 살 권리가 있어요','⚽ 충분히 쉬고 놀 권리가 있어요',
@@ -62,7 +64,7 @@ const DIFF_FACT=['📚 모든 어린이는 배울 권리가 있어요','🏥 아
 arcDefine({id:'rights_diff',ch:'rights',name:'모두의 마을 틀린 그림',tag:'다른 그림 찾기',from:'다른 그림 찾기 · 틀린 그림 찾기',icon:'🔍',
   how:['위·아래 그림에서 다른 곳을 눌러요','아무 데나 누르면 시간이 줄어요','빨리 찾을수록 별이 많아요'],
   init(G){
-    const SC=['diff_town.jpg','diff_park.jpg','diff_school.jpg'],key=SC[(G.lv-1+G.ri(0,2))%3];
+    const SC=DIFF_SCENES;let key;try{S.diffSeen=S.diffSeen||[];let u=S.diffSeen.filter(k=>SC.includes(k));if(u.length>=SC.length)u=u.slice(-2);const av=SC.filter(k=>!u.includes(k));key=G.pick(av);u.push(key);S.diffSeen=u;save()}catch(e){key=G.pick(SC)}
     const K=4+Math.round(G.d*4),PW=344,PH=229,X0=8,Y1=6,Y2=Y1+PH+26,HR=2;
     let base=null,alt=null,diffs=[],time=80-30*G.d,miss=0,hint=0,facts=G.shuffle(DIFF_FACT.slice()),fi=0,msg=null;const T0=time;
     const STK=['🎈','🐦','🌷','⚽','🦋','🍎','🐱','⭐','🎀','🧸','🍩','🐞'];
