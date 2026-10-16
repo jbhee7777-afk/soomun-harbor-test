@@ -23,13 +23,13 @@ arcDefine({id:'multi_slice',ch:'multi',name:'세계 요리 주문 썰기',tag:'�
     const fe=f=>arcSprite(f[0])?f[0]:(f[3]||f[0]);
     const spawn=()=>{const n=G.d>.35&&Math.random()<.3+.4*G.d?2+(G.d>.75&&Math.random()<.4?1:0):1;for(let i=0;i<n;i++){const bomb=Math.random()<.07+.18*G.d,x=G.rand(60,AW-60);
       const mine=WFOOD2.filter(f=>f[2]===target),oth=WFOOD2.filter(f=>f[2]!==target),f=Math.random()<.5?G.pick(mine):G.pick(oth);
-      objs.push({x,y:AH+30,vx:(AW/2-x)*G.rand(.25,.6),vy:-G.rand(610,740),r:G.rand(-3,3),bomb,f:bomb?null:f,R:30})}};
+      objs.push({x,y:AH+30,vx:(AW/2-x)*G.rand(.25,.6),vy:-G.rand(610,740),r:G.rand(-3,3),bomb,f:bomb?null:f,R:bomb?26:38})}};
     const nextOrder=()=>{let c;do{c=G.pick(countries)}while(c===target);target=c;need=2+Math.round(G.d*2);banner=1.8;G.sfx('unlock')};
-    const chord=(o,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);if(L<4)return false;let k=((o.x-a.x)*dx+(o.y-a.y)*dy)/(L*L);if(k<0||k>1)return false;return Math.hypot(a.x+dx*k-o.x,a.y+dy*k-o.y)<o.R*.6};
+    const chord=(o,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);if(L<4)return false;let k=((o.x-a.x)*dx+(o.y-a.y)*dy)/(L*L);if(k<0||k>1)return false;return Math.hypot(a.x+dx*k-o.x,a.y+dy*k-o.y)<o.R};
     return {
       boostText:'하트 +1', boost(){hearts=Math.min(3,hearts+1)},
       update(dt){t-=dt;banner=Math.max(0,banner-dt);if(t<=0){spawn();t=G.rand(.8,1.2)*(1-.5*G.d)}
-        stam=Math.min(100,stam+dt*30);tired=Math.max(0,tired-dt);
+        stam=Math.min(100,stam+dt*45);tired=Math.max(0,tired-dt);
         for(const o of objs){o.vy+=620*dt;o.x+=o.vx*dt;o.y+=o.vy*dt;if(o.y>AH+50&&o.vy>0&&!o.gone){o.gone=1;if(!o.bomb&&o.f[2]===target){hearts--;G.sfx('no');G.pop(`${o.f[1]}를 놓쳤어요`,AW/2,AH-100,'#FF8A8A',20);if(hearts<=0)return G.lose('주문 요리를 너무 많이 놓쳤어요!')}}}
         objs=objs.filter(o=>!o.gone&&!o.cut);for(const h of halves){h.vy+=700*dt;h.x+=h.vx*dt;h.y+=h.vy*dt;h.a+=h.va*dt}halves=halves.filter(h=>h.y<AH+60);
         trail=trail.filter(p=>G.t-p.t<.12);G.setHud(HEARTS(hearts),`🔪 ${got}/${goal}`,`🗒 ${target}`)},
@@ -44,8 +44,8 @@ arcDefine({id:'multi_slice',ch:'multi',name:'세계 요리 주문 썰기',tag:'�
         if(banner){c.globalAlpha=Math.min(1,banner*2);G.rr(30,200,AW-60,70,18,'rgba(20,10,30,.85)','#FFE27A',3);G.text(`새 주문: ${target} 요리!`,AW/2,235,26,'#FFE27A','center',null);c.globalAlpha=1}},
       down(x,y){trail=[{x,y,t:G.t}]},
       move(x,y,dn){if(!dn)return;const p={x,y,t:G.t},a=trail[trail.length-1]||p;trail.push(p);const seg=Math.hypot(p.x-a.x,p.y-a.y),sp=seg/Math.max(.001,p.t-a.t);
-        stam-=seg*.085;if(stam<=0&&!tired){tired=1.2;stam=0;G.sfx('no')}
-        if(tired||sp<600+240*G.d)return;
+        stam-=seg*.035;if(stam<=0&&!tired){tired=1.2;stam=0;G.sfx('no')}
+        if(tired||sp<260+140*G.d)return;
         for(const o of objs){if(o.cut||!chord(o,a,p))continue;o.cut=1;
           if(o.bomb){hearts--;G.sfx('hurt');G.shake=8;G.burst(o.x,o.y,'#FF6A5A',20);if(hearts<=0)return G.lose('폭탄을 너무 많이 건드렸어요!');continue}
           const e=fe(o.f);halves.push({x:o.x,y:o.y,vx:-70,vy:-100,a:0,va:-3,e,s:-1},{x:o.x,y:o.y,vx:70,vy:-100,a:0,va:3,e,s:1});
