@@ -23,7 +23,7 @@ function quizOrder(G,q){const ans=String(q.o[q.a]).trim();let idx=q.o.map((_,i)=
 arcDefine({id:'character_crowd',ch:'character',name:'친구 모으기 런',tag:'착한 행동 문 고르기',from:'카운트 마스터즈 (Count Masters)',icon:'🧑‍🤝‍🧑',
   how:['좌우로 끌어서 움직여요','착한 행동 문으로! 친구가 늘어요','끝에서 외로운 거인과 친구가 돼요'],
   init(G){
-    const pairs=6+Math.round(G.d*6), SP=240+150*G.d, HOR=170, PY=448, FOC=330, RW=150;
+    const pairs=6+Math.round(G.d*6), SP=240+150*G.d, HOR=170, PY=448, FOC=330, RW=150;const LOGW=22;
     const kinds=G.shuffle(KIND.slice()), unk=G.shuffle(UNKIND.slice());let ki=0,ui=0;
     const good=()=>Math.random()<.28?{op:'×',v:2}:{op:'+',v:G.ri(3,6)+Math.round(G.d*5)};
     const bad=()=>Math.random()<.3?{op:'÷',v:2}:{op:'-',v:G.ri(3,6)+Math.round(G.d*7)};
@@ -58,7 +58,7 @@ arcDefine({id:'character_crowd',ch:'character',name:'친구 모으기 런',tag:'
           for(const e of ev){e.z-=SP*dt;
             if(e.type==='gate'&&!e.done&&e.z<=0){e.done=1;apply(e.sides[cx<AW/2?0:1]);if(n<=0)return G.lose('친구가 모두 떠났어요… 착한 행동 문을 골라요!')}
             if(e.type==='log'){e.rot+=dt*6;e.x+=e.dir*(70+120*G.d)*dt;if(e.x<-105||e.x>105){e.dir*=-1;e.x=G.clamp(e.x,-105,105)}
-              if(!e.done&&Math.abs(e.z)<18){const wx=cx-AW/2,R=rad(),ov=Math.max(0,Math.min(wx+R,e.x+46)-Math.max(wx-R,e.x-46))/(2*R);
+              if(!e.done&&Math.abs(e.z)<18){const wx=cx-AW/2,R=rad(),ov=Math.max(0,Math.min(wx+R,e.x+LOGW+10)-Math.max(wx-R,e.x-LOGW-10))/(2*R);
                 if(ov>0){const lost=Math.max(1,Math.ceil(n*ov*.5));n=Math.max(0,n-lost);e.done=1;G.sfx('hurt');G.shake=6;flash={k:false,txt:`-${lost}`,sub:'🪵 통나무에 걸렸어요',t:1};if(n<=0)return G.lose('친구가 모두 떠났어요…')}}}}
           ev=ev.filter(e=>e.z>-400);
           if(!ev.length){phase='boss';bt=0;G.sfx('boss')}}
@@ -90,9 +90,12 @@ arcDefine({id:'character_crowd',ch:'character',name:'친구 모으기 런',tag:'
         trees.sort((a,b)=>b.z-a.z).forEach(t=>{const p=P(t.z);if(p.y>AH+40)return;G.emo(t.e,X(t.x,p.s),p.y-30*p.s,(t.e==='🌳'?80:40)*p.s)});
         /* 문 · 통나무 (먼 것부터) */
         [...ev].sort((a,b)=>b.z-a.z).forEach(e=>{if(e.z>2500||e.z<-120)return;const p=P(e.z),s=p.s;
-          if(e.type==='log'){const x=X(e.x,s),y=p.y-14*s;G.rr(x-46*s,y-13*s,92*s,26*s,13*s,'#9A6334','#4E2C14',Math.max(1,3*s));
-            for(let k=0;k<4;k++){const lx=x-40*s+((k*24*s+e.rot*12*s)%(84*s));c.strokeStyle='rgba(78,44,20,.5)';c.lineWidth=2*s;c.beginPath();c.moveTo(lx,y-10*s);c.lineTo(lx,y+10*s);c.stroke()}
-            G.circle(x-46*s,y,13*s,'#D9A46A','#4E2C14',Math.max(1,2*s));G.circle(x+46*s,y,13*s,'#D9A46A','#4E2C14',Math.max(1,2*s));return}
+          if(e.type==='log'){/* 짧은 통나무: 그림자 · 나무껍질 · 나이테 (굴러가며 나이테가 돌아요) */
+            const x=X(e.x,s),y=p.y-13*s,L=LOGW*s,r=12*s;c.fillStyle='rgba(0,30,70,.28)';c.beginPath();c.ellipse(x,p.y,L+r,6*s,0,0,6.29);c.fill();
+            const g=c.createLinearGradient(0,y-r,0,y+r);g.addColorStop(0,'#C48A52');g.addColorStop(.45,'#8A5A30');g.addColorStop(1,'#4E2C14');G.rr(x-L,y-r,2*L,2*r,3*s,g);
+            c.strokeStyle='rgba(60,32,12,.55)';c.lineWidth=Math.max(1,1.6*s);for(const k of [-.45,0,.45]){c.beginPath();c.moveTo(x-L+2*s,y+k*r);c.bezierCurveTo(x-L*.3,y+k*r-2*s,x+L*.3,y+k*r+2*s,x+L-2*s,y+k*r);c.stroke()}
+            for(const sd of [-1,1]){const cx2=x+sd*L;G.circle(cx2,y,r,'#E8C08A','#6B3D1F',Math.max(1,2*s));c.strokeStyle='rgba(140,90,40,.8)';c.lineWidth=Math.max(.8,1.2*s);
+              for(const rr of [.65,.35]){c.beginPath();c.arc(cx2,y,r*rr,e.rot*sd,e.rot*sd+5);c.stroke()}G.circle(cx2,y,1.6*s,'#8A5A30')}return}
           const H=130*s;e.sides.forEach((sd,i)=>{const w0=i?6:-RW+4,w1=i?RW-4:-6,x0=X(w0,s),x1=X(w1,s),w=x1-x0,top=p.y-H;
             const g=c.createLinearGradient(0,top,0,p.y);g.addColorStop(0,'rgba(120,200,255,.78)');g.addColorStop(1,'rgba(60,120,230,.62)');
             G.rr(x0,top,w,H,10*s,g,'#FFFFFF',Math.max(1.5,4*s));G.rr(x0+6*s,top+6*s,w-12*s,10*s,5*s,'rgba(255,255,255,.45)');
