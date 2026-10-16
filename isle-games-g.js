@@ -302,7 +302,7 @@ arcDefine({id:'safety_cross',ch:'safety',name:'안전 건널목',tag:'신호 보
             c.save();if(on&&!blink){c.shadowColor='#4CFF8A';c.shadowBlur=12}G.rr(x+1,top+1,S-2,bot-top-2,4,null,on?(blink?'#C8FFC8':'#3FE07A'):'#FF4A4A',3);c.restore();
             const bx=x+S-9,by=bot+2;G.rr(bx-1,by,2,12,1,'#555');G.rr(bx-8,by-1,16,15,4,'#15151C','#555',1.5);
             if(on)G.text('🚶',bx,by+7,11,'#3FE07A','center',null);else G.circle(bx,by+6.5,5,'#FF4A4A');
-            if(on){const sec=Math.ceil(w.ctl.t);G.text(String(sec),x+S/2,(top+bot)/2,18,blink?'#FFFFFF':'#C8FFC8','center','#0A4A20')}})});
+            })});
         G.emo('🏫',AW/2,OY+S/2-2,34);
         for(const row in lanes){const L=lanes[row];for(const k of L.cars){const x=k.x+k.w/2,y=OY+row*S+S/2,s=k.w>40?42:34;c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(x,y+12,k.w/2,5,0,0,6.29);c.fill();
           if(L.dir>0)emoFlip(G,k.e,x,y,s);else G.emo(k.e,x,y,s);if(k.rude)G.emo('🚨',x,y-17,15)}}
