@@ -100,15 +100,17 @@ const PIN_LV=[
   {h:'금화 먼저! 충동구매 구슬은 쓰레기통으로',bins:[[8,180,'trash'],[180,352,'pig']],w:[[30,40,30,140],[120,40,120,140],[240,40,240,140],[330,40,330,140],[30,175,150,225],[330,175,210,225],[240,320,80,375]],
     p:[[30,140,120,140],[240,140,330,140],[140,250,290,300]],b:[['g',36,50,78,82,10],['x',246,50,78,82,8]],need:{pig:'g',trash:'x'}},
   {h:'빈 동전은 금화에 닿아야 금화가 돼요',bins:[[8,180,'trash'],[180,352,'pig']],w:[[130,30,130,110],[230,30,230,110],[110,140,110,250],[250,195,250,250],[270,30,270,120],[345,30,345,120],[345,150,240,182],[95,300,265,345]],
-    p:[[130,110,230,110],[110,250,250,250],[270,120,345,120]],trap:[2],b:[['e',136,36,88,66,10],['g',116,205,128,40,6],['x',276,36,64,78,6]],need:{pig:'ge'}},
+    p:[[130,110,230,110],[110,250,250,250],[270,120,345,120]],trap:[2],b:[['e',136,36,88,66,10],['g',116,205,128,40,6],['x',276,36,64,78,6]],need:{pig:'ge'},ratio:.85},
   {h:'저금통에도, 기부함에도 금화를!',bins:[[8,120,'pig'],[120,240,'trash'],[240,352,'give']],w:[[130,20,130,135],[230,20,230,135],[235,250,100,300],[255,20,255,110],[340,20,340,110]],
     p:[[130,72,230,72],[130,135,230,135],[120,170,262,215],[255,110,340,110]],trap:[3],b:[['g',136,26,88,40,8],['g',136,80,88,48,8],['x',262,28,72,72,6]],need:{pig:'g',give:'g'},split:[[0,'pig'],[1,'give']]},
   {h:'빈 동전 → 금화 → 저금통, 충동구매는 쓰레기통',bins:[[8,180,'trash'],[180,352,'pig']],w:[[30,30,30,110],[120,30,120,110],[30,140,30,230],[120,140,120,230],[240,60,240,180],[330,60,330,180],[30,260,150,300],[330,250,210,300],[240,385,80,430]],
-    p:[[30,110,120,110],[30,230,120,230],[240,180,330,180],[140,320,290,365]],b:[['e',36,36,78,66,8],['g',36,150,78,72,6],['x',246,70,78,100,8]],need:{pig:'ge',trash:'x'}}];
+    p:[[30,110,120,110],[30,230,120,230],[240,180,330,180],[140,320,290,365]],b:[['e',36,36,78,66,8],['g',36,150,78,72,6],['x',246,70,78,100,8]],need:{pig:'ge',trash:'x'},ratio:.85},
+  {h:'빈 동전 두 무리 다 금화로! 충동구매는 마지막',bins:[[8,180,'trash'],[180,352,'pig']],w:[[120,200,120,290],[240,200,240,290],[20,40,20,130],[110,40,110,130],[20,160,128,193],[250,40,250,130],[340,40,340,130],[340,160,232,193],[140,30,140,110],[220,30,220,110],[230,380,90,425]],    p:[[20,130,110,130],[250,130,340,130],[120,290,240,290],[110,320,250,360],[140,110,220,110]],b:[['e',26,46,78,74,7],['e',256,46,78,74,7],['g',126,236,108,48,5],['x',146,36,68,64,6]],need:{pig:'ge',trash:'x'},ratio:.85},
+  {h:'세 곳 모두 채워요! 길 바꾸는 핀 순서가 핵심',bins:[[8,120,'pig'],[120,240,'trash'],[240,352,'give']],w:[[20,40,20,120],[110,40,110,120],[20,150,125,185],[250,40,250,120],[340,40,340,120],[340,150,235,185],[140,30,140,100],[220,30,220,100]],    p:[[20,120,110,120],[250,120,340,120],[140,100,220,100],[110,230,255,270],[250,300,105,340]],b:[['g',26,46,78,66,8],['g',256,46,78,66,8],['x',146,36,68,56,6]],need:{pig:'g',give:'g',trash:'x'},split:[[0,'give'],[1,'pig']],ratio:.8}];
 arcDefine({id:'money_pin',ch:'money',name:'저금 핀 뽑기',tag:'핀 뽑기 순서 퍼즐',from:'풀 더 핀 (Pull the Pin)',icon:'📌',
   how:['핀을 눌러 뽑아요 · 순서가 중요해요','금화는 🐷저금통 · 💝기부함으로','충동구매 구슬은 🗑️쓰레기통으로만'],
   init(G){
-    const ORDER=[0,1,2,3,4,1,2,4,3,4],li=ORDER[(G.lv-1)%10],mir=G.lv>5,L=PIN_LV[li],M=v=>mir?AW-v:v,BR=7;
+    const ORDER=[[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[4,1],[5,1],[6,1]],li=ORDER[(G.lv-1)%10][0],mir=!!ORDER[(G.lv-1)%10][1],L=PIN_LV[li],RT=L.ratio||.75,M=v=>mir?AW-v:v,BR=7;
     const seg=s=>mir?[M(s[0]),s[1],M(s[2]),s[3]]:s.slice();
     let walls=[[8,0,8,560],[352,0,352,560],...L.w.map(seg)],bins=L.bins.map(([a,b,k])=>mir?[AW-b,AW-a,k]:[a,b,k]).sort((p,q)=>p[0]-q[0]);
     bins.slice(1).forEach(b=>walls.push([b[0],452,b[0],560]));
@@ -117,7 +119,7 @@ arcDefine({id:'money_pin',ch:'money',name:'저금 핀 뽑기',tag:'핀 뽑기 �
     const binOf=x=>bins.find(b=>x>=b[0]&&x<b[1]);
     const goldN=balls.filter(b=>b.t!=='x').length,blackN=balls.filter(b=>b.t==='x').length;
     const want={};for(const k in L.need)want[k]=k==='trash'?Math.ceil(blackN*.75):0;
-    if(L.split){L.split.forEach(([gi,k])=>{want[k]=Math.ceil(balls.filter(b=>b.grp===gi).length*.7)})}else for(const k in L.need)if(k!=='trash')want[k]=Math.ceil(goldN*.75);
+    if(L.split){L.split.forEach(([gi,k])=>{want[k]=Math.ceil(balls.filter(b=>b.grp===gi).length*RT)})}else for(const k in L.need)if(k!=='trash')want[k]=Math.ceil(goldN*RT);
     let ended=false,settle=0,pulled=0,fact=G.pick(PIG_FACT);
     const segs=()=>[...walls,...pins.filter(p=>!p.pull).map(p=>p.s)];
     const coll=(b,s)=>{const [x1,y1,x2,y2]=s,dx=x2-x1,dy=y2-y1,L2=dx*dx+dy*dy||1;let k=((b.x-x1)*dx+(b.y-y1)*dy)/L2;k=Math.max(0,Math.min(1,k));const px=x1+dx*k,py=y1+dy*k,ddx=b.x-px,ddy=b.y-py,d=Math.hypot(ddx,ddy);
@@ -136,7 +138,7 @@ arcDefine({id:'money_pin',ch:'money',name:'저금 핀 뽑기',tag:'핀 뽑기 �
               if(a.t==='x'&&b.t!=='x')b.t='x';else if(b.t==='x'&&a.t!=='x')a.t='x';else if(a.t==='g'&&b.t==='e')b.t='g';else if(b.t==='g'&&a.t==='e')a.t='g'}}}
         for(const p of pins){if(p.pull)p.out+=dt*500;if(p.hint)p.hint=Math.max(0,p.hint-dt)}
         const moving=balls.some(b=>!b.in&&Math.hypot(b.vx,b.vy)>20);settle=moving?0:settle+dt;
-        if(!ended&&settle>.7&&done()){ended=true;const extraOk=Object.keys(want).every(k=>count(k)>=Math.min(want[k]/.75*.95,want[k]+3));return G.win(extraOk&&pulled<=pins.filter(p=>!p.trap).length?3:2)}
+        if(!ended&&settle>.7&&done()){ended=true;const extraOk=Object.keys(want).every(k=>count(k)>=Math.min(want[k]/RT*.95,want[k]+3));return G.win(extraOk&&pulled<=pins.filter(p=>!p.trap).length?3:2)}
         if(!ended&&settle>1.4&&pins.every(p=>p.pull||p.trap)){ended=true;return G.lose(Object.keys(want).map(k=>`${ICON[k]} ${count(k)}/${want[k]}`).join(' · ')+' — 핀 순서를 바꿔 봐요!')}
         G.setHud(Object.keys(want).map(k=>`${ICON[k]}${count(k)}/${want[k]}`).join(' '),`📌 ${pulled}개`,`${G.lv}단계`)},
       draw(c){c.fillStyle=G.grad(0,AH,'#FFF6E4','#F4DDB0');c.fillRect(0,0,AW,AH);
