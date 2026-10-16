@@ -325,7 +325,8 @@ function arcMakeG(cv,lv,d,ch){
 }
 function arcBest(){if(!AR||!AR.G)return;const r=arcRec(AR.id);if(AR.G.score>(r.best||0)){r.best=AR.G.score;save()}}
 /* 중간에 나가도 점수(최고 기록)는 남겨요 — 단계 별은 깬 순간 바로 저장돼요 */
-function ARC_settle(){if(!AR||!AR.G)return;arcBest();AR.G.over=true;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* 저장만 해요 (창을 잠깐 벗어날 때도 불려서, 여기서 놀이를 끝내면 돌아와도 멈춰 있어요. 나가기는 arcStop 이 멈춰요) */
+function ARC_settle(){if(!AR||!AR.G)return;arcBest();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 window.ARC_settle=ARC_settle;
 
 /* ---------- 판 끝 ---------- */
