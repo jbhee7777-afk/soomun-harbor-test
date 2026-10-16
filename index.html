@@ -1296,17 +1296,20 @@ section#hub{position:relative;overflow:hidden;padding:0;background:#120C22}
 <div id="ghost" hidden></div>
 <div id="bghost" hidden></div>
 <script src="assets/art-manifest.js"></script>
-<script src="assets/arc-art.js?v=20261016n"></script>
-<script src="arcade.js?v=20261016n"></script>
-<script src="arcade-games.js?v=20261016n"></script>
-<script src="arcade-games-2.js?v=20261016n"></script>
-<script src="arcade-games-3.js?v=20261016n"></script>
-<script src="isle-games-a.js?v=20261016n"></script>
-<script src="isle-games-b.js?v=20261016n"></script>
-<script src="isle-games-c.js?v=20261016n"></script>
-<script src="isle-games-d.js?v=20261016n"></script>
-<script src="isle-games-e.js?v=20261016n"></script>
-<script src="isle-games-f.js?v=20261016n"></script>
+<script src="assets/arc-art.js?v=20261016q"></script>
+<script src="arcade.js?v=20261016q"></script>
+<script src="arcade-games.js?v=20261016q"></script>
+<script src="arcade-games-2.js?v=20261016q"></script>
+<script src="arcade-games-3.js?v=20261016q"></script>
+<script src="isle-games-a.js?v=20261016q"></script>
+<script src="isle-games-b.js?v=20261016q"></script>
+<script src="isle-games-c.js?v=20261016q"></script>
+<script src="isle-games-d.js?v=20261016q"></script>
+<script src="isle-games-e.js?v=20261016q"></script>
+<script src="isle-games-f.js?v=20261016q"></script>
+<script src="isle-games-g.js?v=20261016q"></script>
+<script src="isle-games-h.js?v=20261016q"></script>
+<script src="isle-games-i.js?v=20261016q"></script>
 <script>
 /* ===== 범교과 10개 주제 콘텐츠 (2022 개정 교육과정 총론) ===== */
 const CH = [
@@ -2468,7 +2471,7 @@ function hxHouse(x,w,h,roof,i){
 function hubOwn(ch){return !!(window.ARC_HUBS&&window.ARC_HUBS[ch.id])}
 function hubBgOf(ch){return hubOwn(ch)?window.ARC_HUBS[ch.id]:ART.hub_bg}
 /* 허브에 띄울 그림: 놀이 아이콘에 그림이 없으면 닮은 그림으로 */
-const HUB_ICON={character_merge:'🌷',character_crowd:'🙌',character_rhythm:'🎹',career_block:'🚀',career_wordle:'📝',career_helix:'🪜',democracy_arrows:'🪧',rights_diff:'👀',multi_hexa:'🎁',money_mart:'🛒',money_pin:'🐷',eco_hole:'🌪',eco_ballblast:'⚽'};
+const HUB_ICON={character_merge:'🌷',character_crowd:'🙌',character_rhythm:'🎹',career_block:'🚀',career_wordle:'📝',career_helix:'🪜',democracy_arrows:'🪧',rights_diff:'👀',multi_hexa:'🎁',money_mart:'🛒',money_pusher:'🪙',money_pin:'🐷',eco_hole:'🌪',eco_ballblast:'⚽'};
 const hubIco=g=>HUB_ICON[g.id]||g.icon;
 function hubSpr(e){return window.ARC_SPRITES&&window.ARC_SPRITES[String(e).replace(/\uFE0F/g,'')]}
 /* 섬 분위기: 그 섬 놀이 그림들이 하늘에 둥둥 */
@@ -4330,7 +4333,7 @@ function caveGate(){
 function openCave(from){
   if(!caveOpen()) return caveGate();
   const cv=caveState(); CAVE={from:from||1,clear:false}; coachEnd(true); sfx.boss();
-  $('#caveFrame').src='dungeon.html?v=20261016n&g='+curGrade()+'&from='+(from||1);
+  $('#caveFrame').src='dungeon.html?v=20261016q&g='+curGrade()+'&from='+(from||1);
   $('#cave').hidden=false;
 }
 function closeCave(){
